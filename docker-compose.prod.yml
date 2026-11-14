@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  backend:
+    # Build නොකර Docker Hub එකෙන් කෙළින්ම Image එක Pull කරගන්නවා
+    image: bhagyaekanayake/tickify-backend:v1.0.0
+    restart: always
+    environment:
+      NODE_ENV: production
+
+  frontend:
+    image: bhagyaekanayake/tickify-frontend:v1.0.0
+    restart: always
+    environment:
+      NODE_ENV: production

@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 1. Database Service: MongoDB
+  # ==========================================
+  mongodb:
+    image: mongo:7.0
+    container_name: tickify-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: tickify
+    volumes:
+      - mongo_data:/data/db #volumn mounting
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 2. In-Memory Cache & Queue Service: Redis
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: tickify-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 3. Application API Service: Backend
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tickify-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      URI: mongodb://mongodb:27017/tickify
+      REDIS_URL: redis://redis:6379
+      # 🔑 Missing Security Keys
+      RSA_PRIVATE_KEY: "dummy_private_key_secret_for_docker"
+      RSA_PUBLIC_KEY: "dummy_public_key_secret_for_docker"
+      JWT_SECRET: "super_secret_jwt_key_tickify"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ==========================================
+  # 4. Client Web UI Service: Frontend
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tickify-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+# ==========================================
+# Persistent Volumes (Data Persistence)
+# ==========================================
+volumes:
+  mongo_data:
+  redis_data:
