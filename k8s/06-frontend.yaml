@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickify-frontend
+  namespace: tickify
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tickify-frontend
+  template:
+    metadata:
+      labels:
+        app: tickify-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: bhagyaekanayake/tickify-frontend:v1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickify-frontend
+  namespace: tickify
+spec:
+  type: ClusterIP
+  selector:
+    app: tickify-frontend
+  ports:
+    - port: 80
+      targetPort: 80

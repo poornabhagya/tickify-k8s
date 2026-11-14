@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickify-redis
+  namespace: tickify
+spec:
+  selector:
+    app: tickify-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tickify-redis
+  namespace: tickify
+spec:
+  serviceName: "tickify-redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickify-redis
+  template:
+    metadata:
+      labels:
+        app: tickify-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          command: ["redis-server", "--appendonly", "yes"]
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 512Mi

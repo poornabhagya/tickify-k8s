@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tickify-config
+  namespace: tickify
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  REDIS_HOST: "tickify-redis"
+  REDIS_PORT: "6379"
+  MONGO_INITDB_DATABASE: "tickify"
+  FRONTEND_URL: "http://tickify.local"
+  BACKEND_URL: "http://tickify-backend:3000"
+  BACKEND_PUBLIC_URL: "http://tickify.local"
+  CORS_ALLOWED_ORIGINS: "http://tickify.local"
