@@ -62,7 +62,9 @@ tickify-k8s/
 │   └── 08-hpa.yaml              # Horizontal Pod Autoscaler (CPU target: 70%)
 ├── docker-compose.yml           # Local multi-container reference setup
 └── README.md
-Prerequisites
+```
+
+###Prerequisites
 Ensure the following tools are installed on your local machine:
 
 Docker Desktop
@@ -73,33 +75,37 @@ kubectl
 
 Node.js (for generating RSA-2048 keypairs)
 
-Step-by-Step Deployment Guide
-1. Start Minikube & Enable Required Addons
+### Step-by-Step Deployment Guide
+### 1. Start Minikube & Enable Required Addons
 Start a local Kubernetes cluster and enable the NGINX Ingress Controller and Metrics Server (required for HPA):
 
-Bash
+```text
 minikube start --driver=docker --cpus=4 --memory=4096
 minikube addons enable ingress
 minikube addons enable metrics-server
-2. Clone the Repository
-Bash
+```
+### 2. Clone the Repository
+```text
 git clone [https://github.com/poornabhagya/tickify-k8s.git](https://github.com/poornabhagya/tickify-k8s.git)
 cd tickify-k8s
-3. Configure Kubernetes Secrets & RSA Keys
+```
+### 3. Configure Kubernetes Secrets & RSA Keys
 Create your local k8s/02-secret.yaml file from the provided template (this file is git-ignored so credentials are never committed):
 
-Bash
+```text
 cp k8s/02-secret.example.yaml k8s/02-secret.yaml
+```
 Generate a fresh RSA-2048 keypair for ticket JWT signing:
 
-Bash
+```text
 node -e "const { generateKeyPairSync } = require('crypto'); const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); console.log('RSA_PRIVATE_KEY:\n' + JSON.stringify(privateKey)); console.log('RSA_PUBLIC_KEY:\n' + JSON.stringify(publicKey));"
+```
 Update k8s/02-secret.yaml with your strong passwords, hex encryption key, and the generated RSA_PRIVATE_KEY and RSA_PUBLIC_KEY strings.
 
-4. Apply Kubernetes Manifests
+### 4. Apply Kubernetes Manifests
 Deploy the manifests in sequential order:
 
-Bash
+```text
 kubectl apply -f k8s/00-namespace.yaml
 kubectl apply -f k8s/01-configmap.yaml
 kubectl apply -f k8s/02-secret.yaml
@@ -109,31 +115,33 @@ kubectl apply -f k8s/05-backend.yaml
 kubectl apply -f k8s/06-frontend.yaml
 kubectl apply -f k8s/07-ingress.yaml
 kubectl apply -f k8s/08-hpa.yaml
-5. Configure Local DNS & Expose Ingress
+```
+### 5. Configure Local DNS & Expose Ingress
 Map tickify.local to 127.0.0.1 in your system hosts file:
 
 Windows (Run PowerShell as Administrator):
 
-PowerShell
+```text
 Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`n127.0.0.1 tickify.local"
-Linux / macOS:
-
-Bash
-echo "127.0.0.1 tickify.local" | sudo tee -a /etc/hosts
+```
 Start the Minikube tunnel in a separate terminal window (keep it running while accessing the app):
 
-Bash
+```text
 minikube tunnel
+```
+
 Open the application in your browser:
 
+```text
 Frontend UI: http://tickify.local
 
 Backend Health Endpoint: http://tickify.local/api/v1/health
 
-Verification & Health Checks
+```
+### Verification & Health Checks
 Run the following commands to verify cluster health, persistence, and autoscaling:
 
-Bash
+```text
 # Check all Pods, Services, and Persistent Volume Claims
 kubectl get pods,svc,pvc -n tickify
 
@@ -148,21 +156,26 @@ kubectl get hpa -n tickify
 
 # Tail logs across all load-balanced backend replicas
 kubectl logs -l app=tickify-backend -n tickify --tail=20
-Cleanup & Cluster Management
-Bash
+
+```
+### Cleanup & Cluster Management
+
+```text
 # Pause the cluster while preserving Persistent Volume data
 minikube stop
 
 # Or delete all Tickify Kubernetes resources completely
 kubectl delete namespace tickify
-Acknowledgements & Credits
+```
+
+## Acknowledgements & Credits
 Special thanks to the original author for creating the full-stack Tickify application codebase:
 
 Original Author: psang39
 
 Original Repository: psang39/tickify
 
-Author
+## Author
 Poorna Bhagya Ekanayake
 
 GitHub: @poornabhagya
