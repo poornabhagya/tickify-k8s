@@ -1,8 +1,10 @@
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import cors from 'cors';
-import Express from 'express';
+import Express, { Request, Response } from 'express';
 import path from 'path';
+import mongoose from 'mongoose';
+import redisClient from './utils/redisClient';
 
 import router from './routes/index';
 
@@ -77,6 +79,33 @@ app.use(compression({
         return compression.filter(req, res);
     },
 }));
+
+const healthCheckHandler = async (_req: Request, res: Response) => {
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    let isRedisConnected = false;
+
+    try {
+        if (redisClient.isOpen) {
+            const pong = await redisClient.ping();
+            isRedisConnected = pong === 'PONG';
+        }
+    } catch {
+        isRedisConnected = false;
+    }
+
+    const isHealthy = isMongoConnected && isRedisConnected;
+    const responsePayload = {
+        status: isHealthy ? 'ok' : 'error',
+        mongo: isMongoConnected ? 'connected' : 'disconnected',
+        redis: isRedisConnected ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString(),
+    };
+
+    return res.status(isHealthy ? 200 : 503).json(responsePayload);
+};
+
+app.get('/api/v1/health', healthCheckHandler);
+app.get('/health', healthCheckHandler);
 
 app.use('/api/v1', router);
 
