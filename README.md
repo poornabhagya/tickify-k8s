@@ -46,7 +46,7 @@ This repository demonstrates migrating a multi-container full-stack application 
 
 ### Repository & Manifest Structure
 
-
+```text
 tickify-k8s/
 ├── backend/                     # Node.js + Express + TypeScript backend API
 ├── frontend/                    # React + Vite frontend with custom Nginx SPA routing
@@ -62,10 +62,7 @@ tickify-k8s/
 │   └── 08-hpa.yaml              # Horizontal Pod Autoscaler (CPU target: 70%)
 ├── docker-compose.yml           # Local multi-container reference setup
 └── README.md
-
----
-
-### Prerequisites
+Prerequisites
 Ensure the following tools are installed on your local machine:
 
 Docker Desktop
@@ -76,7 +73,7 @@ kubectl
 
 Node.js (for generating RSA-2048 keypairs)
 
-### Step-by-Step Deployment Guide
+Step-by-Step Deployment Guide
 1. Start Minikube & Enable Required Addons
 Start a local Kubernetes cluster and enable the NGINX Ingress Controller and Metrics Server (required for HPA):
 
