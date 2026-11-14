@@ -3,7 +3,6 @@ import compression from 'compression';
 import cors from 'cors';
 import Express from 'express';
 import path from 'path';
-import { setServers } from 'node:dns/promises';
 
 import router from './routes/index';
 
@@ -56,8 +55,6 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-setServers(['1.1.1.1', '8.8.8.8']);
 
 app.use(Express.json({ limit: '10mb' }));
 app.use(Express.urlencoded({ limit: '10mb', extended: true }));
